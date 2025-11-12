@@ -37,7 +37,9 @@ class BaseResponseDecorator:
         )
 
     @staticmethod
-    def _infer_content_type(data: t.Any, status_code: int, headers: dict) -> t.Optional[str]:
+    def _infer_content_type(
+        data: t.Any, status_code: int, headers: dict
+    ) -> t.Optional[str]:
         """Infer the response content type from the returned data, headers and operation spec.
 
         :param data: Response data
@@ -50,7 +52,9 @@ class BaseResponseDecorator:
         content_type = utils.extract_content_type(headers)
 
         # TODO: don't default
-        produces = list(set(operation.responses.get(str(status_code), {}).get("content", {}).keys()))
+        produces = list(
+            set(operation.responses.get(str(status_code), {}).get("content", {}).keys())
+        )
         if data is not None and not produces:
             produces = ["application/json"]
 
