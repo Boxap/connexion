@@ -27,10 +27,12 @@ class BaseResponseDecorator:
 
     def build_framework_response(self, handler_response):
         data, status_code, headers = self._unpack_handler_response(handler_response)
+        is_custom_response = not self.framework.is_framework_response(data)
+        if status_code is None and is_custom_response:
+            status_code = self._infer_status_code(data)
         content_type = self._infer_content_type(data, status_code, headers)
-        if not self.framework.is_framework_response(data):
+        if is_custom_response:
             data = self._serialize_data(data, content_type=content_type)
-            status_code = status_code or self._infer_status_code(data)
             headers = self._update_headers(headers, content_type=content_type)
         return self.framework.build_response(
             data, content_type=content_type, status_code=status_code, headers=headers
@@ -54,7 +56,7 @@ class BaseResponseDecorator:
         # TODO: don't default
         produces = list(
             set(operation.responses.get(str(status_code), {}).get("content", {}).keys())
-        )
+        ) or list(set(operation.produces))
         if data is not None and not produces:
             produces = ["application/json"]
 
